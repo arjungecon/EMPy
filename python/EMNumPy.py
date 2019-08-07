@@ -9,7 +9,7 @@ from RandomGaussian import gen_gaussian_mixture
 ax = np.newaxis
 
 
-def exp_max_numpy(data_input, param_guess=None, num_iter=1):
+def exp_max_numpy(data_input, param_guess=None, num_iter=10):
 
     """
         Runs the Expectation-Maximization algorithm using NumPy.
@@ -40,13 +40,13 @@ def exp_max_numpy(data_input, param_guess=None, num_iter=1):
                               np.array(list(map(lambda x: x.logpdf(data_input), dist_mix))))
 
         # Step 2 - Compute the posterior probabilities.
-        em_prob = np.exp(em_log - logsumexp(em_log))
+        em_prob = np.exp(em_log - logsumexp(em_log, axis=1)[:, ax])
 
         # Step 3 - Update the guess of the mixture parameters.
-        alpha = em_prob.sum(axis=0)
-        mu = np.sum(em_prob * data_input[:, ax], axis=0)/alpha
+        alpha = em_prob.sum(axis=0)/em_prob.sum()
+        mu = np.sum(em_prob * data_input[:, ax], axis=0)/em_prob.sum(axis=0)
         sig = np.sqrt(np.sum(em_prob * np.power(data_input[:, ax] - mu[ax, :], 2),
-                             axis=0)/alpha)
+                             axis=0)/em_prob.sum(axis=0))
 
     return alpha, mu, sig
 
