@@ -1,37 +1,30 @@
 import numpy as np
-import numpy.random
+cimport numpy as np
 import scipy.stats as ss
-import matplotlib.pyplot as plt
 from scipy.special import logsumexp
 
-from RandomGaussian import gen_gaussian_mixture
+DTYPE = np.double
+ctypedef np.double_t DTYPE_t
 
 ax = np.newaxis
 
-
-def exp_max_numpy(data_input, param_guess=None, num_iter=1):
+def exp_max_cython(object data_input, object param_guess, int num_iter=25):
 
     """
-        Runs the Expectation-Maximization algorithm using NumPy.
+        Runs the Expectation-Maximization algorithm using Cython.
         :param data_input: Data used in the EM algorithm
         :param param_guess: Initial guess for parameter values
         :param num_iter: Number of iterations (default 100)
         :return: Estimated parameters
     """
 
-    if param_guess is None:
-        init_mu = np.array([2.0, 2.5])
-        init_sig = np.array([0.8, 1.0])
-        init_weights = np.array([0.2, 0.8])
-    else:
-        init_mu = param_guess['mu']
-        init_sig = param_guess['sig']
-        init_weights = param_guess['weight']
-
     # Initialize the parameters to be estimated
-    mu, sig, alpha = init_mu, init_sig, init_weights
 
-    for ite in range(0, num_iter):
+    cdef np.ndarray mu = param_guess['mu']
+    cdef np.ndarray sig = param_guess['sig']
+    cdef np.ndarray alpha = param_guess['weight']
+
+    for ite in range(1, num_iter):
 
         dist_mix = np.vectorize(ss.norm)(mu, sig)
 
@@ -49,10 +42,3 @@ def exp_max_numpy(data_input, param_guess=None, num_iter=1):
                              axis=0)/alpha)
 
     return alpha, mu, sig
-
-
-input_mix = {'mu_sig': np.array([[2.0, 0.5], [5.0, 0.7]]),
-             'weights': np.array([0.3, 0.7])}
-
-data = gen_gaussian_mixture(input_mix, num_sample=10000, do_plot=True)
-result = exp_max_numpy(data)
