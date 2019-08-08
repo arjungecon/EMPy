@@ -1,10 +1,6 @@
 import numpy as np
-import numpy.random
 import scipy.stats as ss
-import matplotlib.pyplot as plt
 from scipy.special import logsumexp
-
-from RandomGaussian import gen_gaussian_mixture
 
 ax = np.newaxis
 
@@ -14,6 +10,7 @@ def exp_max_numpy(data_input, num_ker, param_guess, num_iter=100):
     """
         Runs the Expectation-Maximization algorithm using NumPy.
         :param data_input: Data used in the EM algorithm
+        :param num_ker: Number of kernels in the mixture
         :param param_guess: Initial guess for parameter values
         :param num_iter: Number of iterations (default 100)
         :return: Estimated parameters
