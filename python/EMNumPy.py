@@ -9,7 +9,7 @@ from RandomGaussian import gen_gaussian_mixture
 ax = np.newaxis
 
 
-def exp_max_numpy(data_input, param_guess=None, num_iter=10):
+def exp_max_numpy(data_input, num_ker, param_guess, num_iter=100):
 
     """
         Runs the Expectation-Maximization algorithm using NumPy.
@@ -19,17 +19,12 @@ def exp_max_numpy(data_input, param_guess=None, num_iter=10):
         :return: Estimated parameters
     """
 
-    if param_guess is None:
-        init_mu = np.array([2.0, 2.5])
-        init_sig = np.array([0.8, 1.0])
-        init_weights = np.array([0.2, 0.8])
-    else:
-        init_mu = param_guess['mu']
-        init_sig = param_guess['sig']
-        init_weights = param_guess['weight']
-
     # Initialize the parameters to be estimated
-    mu, sig, alpha = init_mu, init_sig, init_weights
+    mu, sig, alpha = param_guess['mu'], param_guess['sig'], param_guess['weight']
+
+    # Check if initial guess is valid
+    assert np.min([mu.shape[0], sig.shape[0], alpha.shape[0]]) == num_ker,\
+        "Shape of initial guess does not match the number of kernels."
 
     for ite in range(0, num_iter):
 
@@ -48,11 +43,7 @@ def exp_max_numpy(data_input, param_guess=None, num_iter=10):
         sig = np.sqrt(np.sum(em_prob * np.power(data_input[:, ax] - mu[ax, :], 2),
                              axis=0)/em_prob.sum(axis=0))
 
-    return alpha, mu, sig
+    result_dict = {'alpha': alpha, 'mu': mu, 'sig': sig}
+    return result_dict
 
 
-input_mix = {'mu_sig': np.array([[2.0, 0.5], [5.0, 0.7]]),
-             'weights': np.array([0.3, 0.7])}
-
-data = gen_gaussian_mixture(input_mix, num_sample=10000, do_plot=True)
-result = exp_max_numpy(data)
